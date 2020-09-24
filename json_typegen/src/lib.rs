@@ -5,13 +5,13 @@
 //!
 //! ```rust
 //! use json_typegen::json_typegen;
-//!
+//! use rust_decimal::Decimal;
 //! json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 //!
 //! fn main() {
 //!     let mut p: Point = serde_json::from_str(r#"{ "x": 3, "y": 5 }"#).unwrap();
 //!     println!("deserialized = {:?}", p);
-//!     p.x = 4;
+//!     p.x = Decimal::new(4, 0);
 //!     let serialized = serde_json::to_string(&p).unwrap();
 //!     println!("serialized = {}", serialized);
 //! }
@@ -61,11 +61,14 @@
 
 extern crate proc_macro;
 
-use json_typegen_shared::{codegen_from_macro_input};
+use json_typegen_shared::codegen_from_macro_input;
 
 /// The main point of this crate
 /// See root documentation
 #[proc_macro]
 pub fn json_typegen(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    codegen_from_macro_input(&input.to_string()).unwrap().parse().unwrap()
+    codegen_from_macro_input(&input.to_string())
+        .unwrap()
+        .parse()
+        .unwrap()
 }

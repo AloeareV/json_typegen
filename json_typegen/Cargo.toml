@@ -17,6 +17,7 @@ travis-ci = { repository = "evestera/json_typegen" }
 
 [dependencies]
 json_typegen_shared = { path = "../json_typegen_shared", version = "0.4" }
+rust_decimal = "1.8.1"
 
 [dev-dependencies]
 serde = "1.0"

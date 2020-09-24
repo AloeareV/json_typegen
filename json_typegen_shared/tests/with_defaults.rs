@@ -1,3 +1,4 @@
+use rust_decimal::Decimal;
 use testsyn::{parse_str, Item};
 
 use json_typegen_shared::{codegen, Options};
@@ -44,8 +45,8 @@ fn point() {
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             pub struct Point {
-                pub x: i64,
-                pub y: i64,
+                pub x: Decimal,
+                pub y: Decimal,
             }
         "##,
     );
@@ -64,8 +65,8 @@ fn pub_crate_point() {
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             pub(crate) struct Point {
-                pub x: i64,
-                pub y: i64,
+                pub x: Decimal,
+                pub y: Decimal,
             }
         "##,
     );
@@ -92,10 +93,10 @@ fn optionals() {
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             pub struct Optional {
-                pub in_both: i64,
-                pub missing: Option<i64>,
-                pub has_null: Option<i64>,
-                pub added: Option<i64>,
+                pub in_both: Decimal,
+                pub missing: Option<Decimal>,
+                pub has_null: Option<Decimal>,
+                pub added: Option<Decimal>,
             }
         "##,
     );
@@ -154,18 +155,18 @@ fn nesting() {
 
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             pub struct Nested {
-                pub a: i64,
+                pub a: Decimal,
                 pub doubly_nested: DoublyNested,
             }
 
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             pub struct DoublyNested {
-                pub c: i64,
+                pub c: Decimal,
             }
 
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             pub struct InArray {
-                pub b: i64,
+                pub b: Decimal,
             }
         "##,
     );
@@ -197,8 +198,8 @@ fn tuple() {
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             pub struct Pagination {
-                pub pages: i64,
-                pub items: i64,
+                pub pages: Decimal,
+                pub items: Decimal,
             }
 
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
@@ -222,7 +223,7 @@ fn rename() {
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             pub struct Renamed {
                 #[serde(rename = "type")]
-                pub type_field: i64,
+                pub type_field: Decimal,
             }
         "##,
     );
