@@ -48,7 +48,11 @@ pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
     }
 }
 
-pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
+pub fn rust_types(
+    name: &str,
+    shape: &Shape,
+    options: Options,
+) -> (Ident, Option<Code>) {
     let mut ctxt = Ctxt {
         options,
         type_names: HashSet::new(),
@@ -58,7 +62,11 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option
     alias(ident, name, code, &ctxt.options)
 }
 
-fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
+fn type_from_shape(
+    ctxt: &mut Ctxt,
+    path: &str,
+    shape: &Shape,
+) -> (Ident, Option<Code>) {
     use crate::shape::Shape::*;
     match shape {
         Null | Any | Bottom => ("::serde_json::Value".into(), None),
@@ -75,7 +83,9 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
             }
         }
         VecT { elem_type: e } => generate_vec_type(ctxt, path, &e),
-        Struct { fields: map } => generate_struct_from_field_shapes(ctxt, path, &map),
+        Struct { fields: map } => {
+            generate_struct_from_field_shapes(ctxt, path, &map)
+        }
         MapT { val_type: v } => generate_map_type(ctxt, path, &v),
         Opaque(t) => (t.clone(), None),
         Optional(e) => {
@@ -89,13 +99,21 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
     }
 }
 
-fn generate_vec_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
+fn generate_vec_type(
+    ctxt: &mut Ctxt,
+    path: &str,
+    shape: &Shape,
+) -> (Ident, Option<Code>) {
     let singular = path.to_singular();
     let (inner, defs) = type_from_shape(ctxt, &singular, shape);
     (format!("Vec<{}>", inner), defs)
 }
 
-fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
+fn generate_map_type(
+    ctxt: &mut Ctxt,
+    path: &str,
+    shape: &Shape,
+) -> (Ident, Option<Code>) {
     let singular = path.to_singular();
     let (inner, defs) = type_from_shape(ctxt, &singular, shape);
     (
@@ -104,7 +122,11 @@ fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Opti
     )
 }
 
-fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &[Shape]) -> (Ident, Option<Code>) {
+fn generate_tuple_type(
+    ctxt: &mut Ctxt,
+    path: &str,
+    shapes: &[Shape],
+) -> (Ident, Option<Code>) {
     let mut types = Vec::new();
     let mut defs = Vec::new();
 
@@ -128,16 +150,18 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
 }
 
 const RUST_KEYWORDS_ARR: &[&str] = &[
-    "abstract", "alignof", "as", "become", "box", "break", "const", "continue", "crate", "do",
-    "else", "enum", "extern", "false", "final", "fn", "for", "if", "impl", "in", "let", "loop",
-    "macro", "match", "mod", "move", "mut", "offsetof", "override", "priv", "proc", "pub", "pure",
-    "ref", "return", "Self", "self", "sizeof", "static", "struct", "super", "trait", "true",
-    "type", "typeof", "unsafe", "unsized", "use", "virtual", "where", "while", "yield", "async",
-    "await", "try",
+    "abstract", "alignof", "as", "become", "box", "break", "const", "continue",
+    "crate", "do", "else", "enum", "extern", "false", "final", "fn", "for",
+    "if", "impl", "in", "let", "loop", "macro", "match", "mod", "move", "mut",
+    "offsetof", "override", "priv", "proc", "pub", "pure", "ref", "return",
+    "Self", "self", "sizeof", "static", "struct", "super", "trait", "true",
+    "type", "typeof", "unsafe", "unsized", "use", "virtual", "where", "while",
+    "yield", "async", "await", "try",
 ];
 
 lazy_static! {
-    static ref RUST_KEYWORDS: HashSet<&'static str> = RUST_KEYWORDS_ARR.iter().cloned().collect();
+    static ref RUST_KEYWORDS: HashSet<&'static str> =
+        RUST_KEYWORDS_ARR.iter().cloned().collect();
 }
 
 fn type_or_field_name(
@@ -175,8 +199,13 @@ fn type_or_field_name(
     unreachable!()
 }
 
-fn collapse_option_vec<'a>(ctxt: &mut Ctxt, typ: &'a Shape) -> (bool, &'a Shape) {
-    if !(ctxt.options.allow_option_vec || ctxt.options.use_default_for_missing_fields) {
+fn collapse_option_vec<'a>(
+    ctxt: &mut Ctxt,
+    typ: &'a Shape,
+) -> (bool, &'a Shape) {
+    if !(ctxt.options.allow_option_vec
+        || ctxt.options.use_default_for_missing_fields)
+    {
         if let Shape::Optional(inner) = typ {
             if let Shape::VecT { .. } = **inner {
                 return (true, &**inner);
@@ -208,7 +237,9 @@ fn generate_struct_from_field_shapes(
             let field_name = field_name(name, &field_names);
             field_names.insert(field_name.clone());
 
-            let needs_rename = if let Some(ref transform) = ctxt.options.property_name_format {
+            let needs_rename = if let Some(ref transform) =
+                ctxt.options.property_name_format
+            {
                 &to_rename_rule(transform).apply_to_field(&field_name) != name
             } else {
                 &field_name != name
@@ -223,7 +254,8 @@ fn generate_struct_from_field_shapes(
                 field_code += "    #[serde(default)]\n";
             }
 
-            let (field_type, child_defs) = type_from_shape(ctxt, name, collapsed);
+            let (field_type, child_defs) =
+                type_from_shape(ctxt, name, collapsed);
 
             if let Some(code) = child_defs {
                 defs.push(code);
@@ -251,7 +283,10 @@ fn generate_struct_from_field_shapes(
 
     if let Some(ref transform) = ctxt.options.property_name_format {
         if *transform != StringTransform::SnakeCase {
-            code += &format!("#[serde(rename_all = \"{}\")]\n", serde_name(transform))
+            code += &format!(
+                "#[serde(rename_all = \"{}\")]\n",
+                serde_name(transform)
+            )
         }
     }
 
