@@ -72,8 +72,8 @@ fn type_from_shape(
         Null | Any | Bottom => ("::serde_json::Value".into(), None),
         Bool => ("bool".into(), None),
         StringT => ("String".into(), None),
-        Integer => ("i64".into(), None),
-        Floating => ("f64".into(), None),
+        Integer => ("Decimal".into(), None),
+        Floating => ("Decimal".into(), None),
         Tuple(shapes, _n) => {
             let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
