@@ -84,6 +84,30 @@ fn lowercase_first_letter(s: &str) -> String {
     }
 }
 
+pub(crate) fn alias(
+    ident: String,
+    name: &str,
+    code: Option<String>,
+    options: &crate::options::Options,
+) -> (String, Option<String>) {
+    use crate::options::OutputMode;
+    let alias_keyword = match options.output_mode {
+        OutputMode::Kotlin => "typealias",
+        OutputMode::Rust | OutputMode::Typescript => "type",
+        OutputMode::JsonSchema | OutputMode::Shape => return (ident, code),
+    };
+    match (&code, options.type_alias_extant_types) {
+        (None, true) => (
+            ident.clone(),
+            Some(format!(
+                "{} {} {} = {};",
+                options.type_visibility, alias_keyword, ident, name
+            )),
+        ),
+        _ => (ident, code),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
